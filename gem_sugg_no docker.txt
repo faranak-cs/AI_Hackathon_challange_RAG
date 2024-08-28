@@ -1,0 +1,58 @@
+You're looking to deploy your Streamlit app directly from your GitHub repository to Cloud Run without using Docker. This is possible using Cloud Build, which can automatically build and deploy your app based on a configuration file. Here's how you can do it:
+
+1. Set Up Your GitHub Repository
+
+Project Structure: Ensure your repository has the following structure:
+app.py (or your main Streamlit file)
+requirements.txt (listing your dependencies)
+cloudbuild.yaml (Cloud Build configuration file)
+requirements.txt :
+streamlit
+langchain
+openai
+requests
+faiss
+chromadb
+PyPDF2
+# ... other dependencies
+Generated code may be subject to license restrictions not shown here. Use code with care. Learn more 
+
+2. Create cloudbuild.yaml
+
+This file tells Cloud Build how to build and deploy your app:
+
+steps:
+  - name: 'gcr.io/cloudbuild/docker'
+    args: ['--build', '--tag', 'us-docker.pkg.dev/cloudrun/container/your-app-name:latest']
+  - name: 'gcr.io/cloudrun/container/push'
+    args: ['us-docker.pkg.dev/cloudrun/container/your-app-name:latest']
+  - name: 'gcr.io/cloudrun/container/deploy'
+    args: ['streamlit-rag-app', '--image', 'us-docker.pkg.dev/cloudrun/container/your-app-name:latest', '--region', 'us-central1']
+Generated code may be subject to license restrictions not shown here. Use code with care. Learn more 
+
+3. Configure Cloud Build
+
+Create a Cloud Build Trigger:
+Go to the Cloud Build console in your Google Cloud project.
+Click "Create Trigger".
+Choose "GitHub" as the trigger type.
+Connect your GitHub account and select your repository.
+Configure the trigger to run on push events to the main branch (or your desired branch).
+Select your cloudbuild.yaml file.
+Click "Create".
+4. Deploy from GitHub
+
+Push to GitHub: Push your changes to your GitHub repository.
+Cloud Build Trigger: The Cloud Build trigger will automatically detect the push and start a build.
+Deployment: Cloud Build will build your app, push the container image to Container Registry, and deploy it to Cloud Run.
+Important Considerations
+
+Environment Variables: Set your OPENAI_API_KEY as an environment variable in Cloud Run. You can do this during deployment or through the Cloud Run console.
+PDF File Handling: If you're using a local PDF file, you'll need to upload it to a cloud storage service (like Cloud Storage) and access it from your Cloud Run app.
+Rate Limiting: Be mindful of OpenAI API rate limits. Consider using a paid plan or implementing rate limiting in your app.
+Security: Secure your Cloud Run service by enabling authentication and authorization if needed.
+Additional Tips
+
+Cloud Build Configuration: You can customize your cloudbuild.yaml to include additional steps, such as running tests or installing dependencies.
+Monitoring and Logging: Set up monitoring and logging to track your app's performance and identify any issues.
+Let me know if you have any more questions or need help with specific steps.
